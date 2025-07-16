@@ -1,0 +1,9 @@
+streamlit
+pandas
+openai
+requests
+beautifulsoup4
+selenium
+webdriver-manager
+google-search-results
+httpx
