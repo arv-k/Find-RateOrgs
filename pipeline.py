@@ -1,3 +1,7 @@
+from selenium import webdriver
+from bs4 import BeautifulSoup
+from urllib.parse import quote_plus
+import time
 http_client = httpx.Client(verify=False)
 # --- Configuration ---
 # It's best to set this as an environment variable
@@ -88,44 +92,41 @@ def scrape_campus_labs():
 # --- Step 2: Find Instagram Profile URL ---
 def find_instagram_url(org_name, school="Michigan State"):
     """
-    Uses Selenium to perform a Google search in a real browser,
-    making it much harder to block.
+    Uses Selenium with options specifically configured for a Streamlit Cloud environment.
     """
-    print(f"  -> Searching for '{org_name}' via Selenium...")
+    print(f"  -> Searching for '{org_name}' via Selenium on Streamlit Cloud...")
     query = f'site:instagram.com "{org_name}" "{school}"'
     search_url = f"https://www.google.com/search?q={quote_plus(query)}"
-    
-    # Setup headless Chrome browser
+
+    # These options are CRITICAL for running in a headless Linux environment like Streamlit's
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Runs Chrome in the background
+    options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36")
-    
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920x1080") # Can help with layout issues
+
     driver = None
     try:
-        # Initialize the Chrome driver automatically
-        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+        # This tells Selenium to use its automatic manager, which works in Streamlit
+        driver = webdriver.Chrome(options=options)
+        
         driver.get(search_url)
-        
-        # Let the page load and handle potential consent pop-ups
+        # Give the page a moment to load
         time.sleep(2) 
-        
-        # Get the page source and parse with BeautifulSoup
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-        # The parsing logic remains the same
+        # Find the first valid Instagram profile link
         for link in soup.find_all('a'):
             href = link.get('href')
-            # Look for a clean Instagram URL
             if href and href.startswith("https://www.instagram.com/"):
+                # Make sure it's a profile, not a post or reel
                 if "/p/" not in href and "/reel/" not in href:
                     return href
     except Exception as e:
         print(f"  -> Selenium search failed for {org_name}. Error: {e}")
         return None
     finally:
-        # Ensure the browser is closed to free up resources
         if driver:
             driver.quit()
             
