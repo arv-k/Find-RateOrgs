@@ -1,4 +1,5 @@
 import requests
+import uuid
 import json
 import re
 import os
@@ -96,14 +97,12 @@ def scrape_campus_labs():
 # --- Step 2: Find Instagram Profile URL ---
 def find_instagram_url(org_name, school="Michigan State"):
     """
-    Uses Selenium with options specifically configured for a Streamlit Cloud environment,
-    including unique user data directories for parallel execution.
+    Uses Selenium with the most robust options for parallel execution in the cloud.
     """
     print(f"  -> Searching for '{org_name}' via Selenium on Streamlit Cloud...")
     query = f'site:instagram.com "{org_name}" "{school}"'
     search_url = f"https://www.google.com/search?q={quote_plus(query)}"
 
-    # These options are CRITICAL for running in a headless Linux environment like Streamlit's
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
@@ -111,10 +110,13 @@ def find_instagram_url(org_name, school="Michigan State"):
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920x1080")
     
-    # --- NEW LINE TO FIX THE ERROR ---
-    # Give each browser instance a unique temporary directory
-    options.add_argument(f"--user-data-dir={tempfile.mkdtemp()}")
-    
+    # --- UPDATED & NEW LINES TO FIX THE ERROR ---
+    # Create a unique directory in the writable /tmp folder
+    user_data_dir = f"/tmp/selenium/{uuid.uuid4()}"
+    options.add_argument(f"--user-data-dir={user_data_dir}")
+    # Tell Chrome to use a random, free port
+    options.add_argument("--remote-debugging-port=0")
+
     driver = None
     try:
         driver = webdriver.Chrome(options=options)
