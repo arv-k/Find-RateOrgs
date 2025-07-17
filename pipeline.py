@@ -8,6 +8,7 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
 import time
+import tempfile
 import concurrent.futures
 http_client = httpx.Client(verify=False)
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), http_client=http_client)
@@ -95,7 +96,8 @@ def scrape_campus_labs():
 # --- Step 2: Find Instagram Profile URL ---
 def find_instagram_url(org_name, school="Michigan State"):
     """
-    Uses Selenium with options specifically configured for a Streamlit Cloud environment.
+    Uses Selenium with options specifically configured for a Streamlit Cloud environment,
+    including unique user data directories for parallel execution.
     """
     print(f"  -> Searching for '{org_name}' via Selenium on Streamlit Cloud...")
     query = f'site:instagram.com "{org_name}" "{school}"'
@@ -107,23 +109,23 @@ def find_instagram_url(org_name, school="Michigan State"):
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920x1080") # Can help with layout issues
-
+    options.add_argument("--window-size=1920x1080")
+    
+    # --- NEW LINE TO FIX THE ERROR ---
+    # Give each browser instance a unique temporary directory
+    options.add_argument(f"--user-data-dir={tempfile.mkdtemp()}")
+    
     driver = None
     try:
-        # This tells Selenium to use its automatic manager, which works in Streamlit
         driver = webdriver.Chrome(options=options)
         
         driver.get(search_url)
-        # Give the page a moment to load
         time.sleep(2) 
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-        # Find the first valid Instagram profile link
         for link in soup.find_all('a'):
             href = link.get('href')
             if href and href.startswith("https://www.instagram.com/"):
-                # Make sure it's a profile, not a post or reel
                 if "/p/" not in href and "/reel/" not in href:
                     return href
     except Exception as e:
@@ -134,7 +136,6 @@ def find_instagram_url(org_name, school="Michigan State"):
             driver.quit()
             
     return None
-
 # --- Step 3: Scrape Instagram Profile ---
 def scrape_instagram_data(profile_url):
     """
