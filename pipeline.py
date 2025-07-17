@@ -1,20 +1,3 @@
-import requests
-import json
-import re
-import os
-from urllib.parse import quote_plus
-from bs4 import BeautifulSoup
-from openai import OpenAI
-import pandas as pd
-import httpx
-import concurrent.futures
-import time 
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
-from urllib.parse import quote_plus
-import time
 http_client = httpx.Client(verify=False)
 # --- Configuration ---
 # It's best to set this as an environment variable
