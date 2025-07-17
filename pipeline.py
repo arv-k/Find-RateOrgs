@@ -11,7 +11,7 @@ import time
 import concurrent.futures
 http_client = httpx.Client(verify=False)
 
-OPENAI_API_KEY = "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" 
+OPENAI_API_KEY = "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' 
 
 
 client = OpenAI(api_key=OPENAI_API_KEY, http_client=http_client)
