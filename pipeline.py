@@ -10,10 +10,8 @@ from urllib.parse import quote_plus
 import time
 import concurrent.futures
 http_client = httpx.Client(verify=False)
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), http_client=http_client)
 
-OPENAI_API_KEY = "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"
-
-client = OpenAI(api_key=OPENAI_API_KEY, http_client=http_client)
 
 # --- Step 1: Scrape CampusLabs (Mock Implementation) ---
 # Replace this with your actual requests/BeautifulSoup implementation
