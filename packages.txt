@@ -6,12 +6,4 @@ libglib2.0-0
 libnss3
 libgconf-2-4
 libfontconfig1
-libx11-6ffmpeg
-libsm6
-libxext6
-libgl1-mesa-glx
-libglib2.0-0
-libnss3
-libgconf-2-4
-libfontconfig1
 libx11-6
